@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acid or Base Quiz!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .question-container {
+            margin: 20px 0;
+        }
+        
+        .question {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .chemical-formula {
+            font-weight: bold;
+            font-size: 22px;
+        }
+        
+        .chemical-name {
+            font-style: italic;
+            color: #555;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .acid-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .acid-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .base-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .base-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .play-again-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .play-again-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .feedback {
+            margin: 15px 0;
+            font-weight: bold;
+            font-size: 18px;
+            min-height: 27px;
+        }
+        
+        .score-container {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        
+        .results {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .correct {
+            color: #2ecc71;
+        }
+        
+        .incorrect {
+            color: #e74c3c;
+        }
+        
+        .ph-scale {
+            margin: 20px 0;
+            height: 30px;
+            background: linear-gradient(to right, #e74c3c, #f39c12, #2ecc71, #3498db);
+            border-radius: 5px;
+            position: relative;
+        }
+        
+        .ph-markers {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Acid or Base Quiz!</h1>
+        
+        <div class="info-box">
+            <p><strong>Remember:</strong> Acids release H<sup>+</sup> ions in water and have pH &lt; 7, while Bases release OH<sup>-</sup> ions and have pH &gt; 7.</p>
+            <div class="ph-scale"></div>
+            <div class="ph-markers">
+                <span>0</span>
+                <span>7</span>
+                <span>14</span>
+            </div>
+        </div>
+        
+        <div id="quiz-container">
+            <div class="question-container">
+                <p class="question">Is <span class="chemical-formula" id="chemical-formula">HCl</span> <span class="chemical-name" id="chemical-name">(Hydrochloric Acid)</span> an acid or a base?</p>
+            </div>
+            
+            <div class="buttons">
+                <button class="acid-btn" onclick="checkAnswer('acid')">Acid</button>
+                <button class="base-btn" onclick="checkAnswer('base')">Base</button>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="score-container">
+                <p>Question: <span id="question-number">1</span>/10</p>
+                <p>Score: <span id="score">0</span></p>
+            </div>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Quiz Complete!</h2>
+            <p>Your final score: <span id="final-score">0</span>/10</p>
+            <button class="play-again-btn" onclick="resetQuiz()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data: chemical formulas, names, and whether they're acids
+        const quizData = [
+            { formula: "HCl", name: "(Hydrochloric Acid)", isAcid: true },
+            { formula: "NaOH", name: "(Sodium Hydroxide)", isAcid: false },
+            { formula: "H₂SO₄", name: "(Sulfuric Acid)", isAcid: true },
+            { formula: "CH₃COOH", name: "(Acetic Acid)", isAcid: true },
+            { formula: "NH₃", name: "(Ammonia)", isAcid: false },
+            { formula: "KOH", name: "(Potassium Hydroxide)", isAcid: false },
+            { formula: "HNO₃", name: "(Nitric Acid)", isAcid: true },
+            { formula: "Ca(OH)₂", name: "(Calcium Hydroxide)", isAcid: false },
+            { formula: "H₃PO₄", name: "(Phosphoric Acid)", isAcid: true },
+            { formula: "Mg(OH)₂", name: "(Magnesium Hydroxide)", isAcid: false },
+            { formula: "HF", name: "(Hydrofluoric Acid)", isAcid: true },
+            { formula: "H₂CO₃", name: "(Carbonic Acid)", isAcid: true },
+            { formula: "Al(OH)₃", name: "(Aluminum Hydroxide)", isAcid: false },
+            { formula: "HBr", name: "(Hydrobromic Acid)", isAcid: true },
+            { formula: "LiOH", name: "(Lithium Hydroxide)", isAcid: false }
+        ];
+        
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let askedQuestions = [];
+        
+        // DOM elements
+        const chemicalFormula = document.getElementById("chemical-formula");
+        const chemicalName = document.getElementById("chemical-name");
+        const feedback = document.getElementById("feedback");
+        const questionNumber = document.getElementById("question-number");
+        const scoreElement = document.getElementById("score");
+        const finalScoreElement = document.getElementById("final-score");
+        const quizContainer = document.getElementById("quiz-container");
+        const resultsContainer = document.getElementById("results");
+        
+        // Initialize quiz
+        function initQuiz() {
+            askedQuestions = [];
+            score = 0;
+            currentQuestionIndex = 0;
+            
+            // Reset display
+            quizContainer.style.display = "block";
+            resultsContainer.style.display = "none";
+            scoreElement.textContent = "0";
+            questionNumber.textContent = "1";
+            
+            // Set first question
+            setNextQuestion();
+        }
+        
+        // Set the next question
+        function setNextQuestion() {
+            feedback.textContent = "";
+            feedback.className = "feedback";
+            
+            // Get a random question that hasn't been asked yet
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * quizData.length);
+            } while (askedQuestions.includes(randomIndex) && askedQuestions.length < quizData.length);
+            
+            askedQuestions.push(randomIndex);
+            
+            // Display the question
+            const currentQuestion = quizData[randomIndex];
+            chemicalFormula.textContent = currentQuestion.formula;
+            chemicalName.textContent = currentQuestion.name;
+        }
+        
+        // Check user's answer
+        function checkAnswer(userAnswer) {
+            const currentQuestion = quizData[askedQuestions[currentQuestionIndex]];
+            const correctAnswer = currentQuestion.isAcid ? "acid" : "base";
+            
+            if (userAnswer === correctAnswer) {
+                feedback.textContent = "Correct! ✓";
+                feedback.className = "feedback correct";
+                score++;
+                scoreElement.textContent = score;
+            } else {
+                feedback.textContent = `Wrong! ✗ ${currentQuestion.formula} is a ${correctAnswer}.`;
+                feedback.className = "feedback incorrect";
+            }
+            
+            // Delay before moving to next question
+            setTimeout(() => {
+                currentQuestionIndex++;
+                
+                if (currentQuestionIndex < 10) {
+                    questionNumber.textContent = currentQuestionIndex + 1;
+                    setNextQuestion();
+                } else {
+                    endQuiz();
+                }
+            }, 1500);
+        }
+        
+        // End the quiz and show results
+        function endQuiz() {
+            quizContainer.style.display = "none";
+            resultsContainer.style.display = "block";
+            finalScoreElement.textContent = score;
+        }
+        
+        // Reset quiz to play again
+        function resetQuiz() {
+            initQuiz();
+        }
+        
+        // Start the quiz when page loads
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
